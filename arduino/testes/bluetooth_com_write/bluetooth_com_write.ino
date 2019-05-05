@@ -1,6 +1,6 @@
 #include "SoftwareSerial.h"
 #include "Statistics.h" 
-https://github.com/provideyourown/statistics
+//https://github.com/provideyourown/statistics
 #include "pitches.h"
 
 #define TX 11 // pino tx
@@ -27,7 +27,8 @@ void setup() {
 
 void loop() {
   // valor lido do tecido, entre 0-255
-  byte val = map(analogRead(ANALOG_PIN), 0,1024,0,255);
+//  byte val = map(analogRead(ANALOG_PIN), 0,1023,0,255);
+  float val = (analogRead(ANALOG_PIN) * 5.0 )/1023.0;
 
   // incluindo o valor no array de stat
   stat.addData(val);
@@ -44,13 +45,14 @@ void loop() {
 
 
   // exibindo no serial monitor
-  Serial.println("Agora: " + String (val));
-  Serial.println("Media: " + String (mean_val) + "\n----");
-  Serial.println("Limite: " + String (middle));
+//  Serial.println("Agora: " + String (val));
+//  Serial.println("Media: " + String (mean_val) + "\n----");
+//  Serial.println("Limite: " + String (middle));
 
+  Serial.println(val);
   // enviando para smartphone
   blth.write(val);
-  delay(300);
+  delay(100);
 }
 
 void triggerAlarm(){

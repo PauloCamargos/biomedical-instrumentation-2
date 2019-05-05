@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">Apneia Monitor</string>
+    <string name="title_inicio">Início</string>
+    <string name="title_alarme">Alarme</string>
+    <string name="title_calibracao">Cablibração</string>
+    <string name="title_historico">Histórico</string>
+    <string name="label_selecionar_conexao">Selcionar conexão: </string>
+    <string name="button_conectar">Conectar</string>
+    <string name="buscar_conexoes">Buscar conexões</string>
+    <string name="dispositivo_conectado">Dispostivo conectado: </string>
+    <string name="nenhum_dispositivo_conectado">Nenhum dispositivo conectado</string>
+    <string name="button_iniciar_calibracao">Iniciar calibração</string>
+    <string name="label_maximo_medido">Máximo medido</string>
+    <string name="label_inspiracao">Inspiração</string>
+    <string name="label_expiracao">Expiração</string>
+    <string name="label_valor_medido">Valor medido: </string>
+    <string name="valor_inspiracao">20 Unidades</string>
+    <string name="button_confirmar">Confirmar calibração</string>
+    <string name="button_cancelar">Cancelar</string>
+    <string name="text_instrucao_expiracao">Realize a respiração por 5 vezes de forma normal.</string>
+    <string name="text_inpiracao_instrucao">Realize a respiração por 5 vezes de forma normal.</string>
+
+    <string-array name="dispositivos_disponiveis">
+        <item>Dispositivo 1</item>
+        <item>Dispositivo 2</item>
+        <item>Dispositivo 3</item>
+    </string-array>
+</resources>
