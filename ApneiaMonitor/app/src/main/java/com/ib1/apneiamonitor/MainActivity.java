@@ -2,12 +2,6 @@ package com.ib1.apneiamonitor;
 
 import android.content.Intent;
 import android.os.Bundle;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.annotation.NonNull;
-
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -16,8 +10,13 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 public class MainActivity extends AppCompatActivity implements
-        AdapterView.OnItemSelectedListener  {
+        AdapterView.OnItemSelectedListener {
     // Tag for the intent extra.
     public static final String EXTRA_MESSAGE =
             "com.ib1.apneiamonitor.extra.MESSAGE";
@@ -77,7 +76,10 @@ public class MainActivity extends AppCompatActivity implements
             spinner.setAdapter(adapter);
         }
         // ... End of onCreate code ...
+
     }
+
+
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {

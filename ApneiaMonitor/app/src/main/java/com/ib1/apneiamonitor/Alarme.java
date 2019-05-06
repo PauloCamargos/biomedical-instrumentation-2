@@ -9,8 +9,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
 public class Alarme extends AppCompatActivity implements
         AdapterView.OnItemSelectedListener {
+
+    public LineGraphSeries<DataPoint> series;
+    int points_amount = 50;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,7 @@ public class Alarme extends AppCompatActivity implements
         // ... End of onCreate code ...
     }
 
+
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String spinnerLabel = parent.getItemAtPosition(position).toString();
@@ -60,5 +68,19 @@ public class Alarme extends AppCompatActivity implements
     public void displayToast(String message) {
         Toast.makeText(getApplicationContext(), message,
                 Toast.LENGTH_SHORT).show();
+    }
+
+    public void plotData(View view) {
+        double x, y;
+        x = 0;
+        points_amount+=50;
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        series = new LineGraphSeries<DataPoint>();
+        for (int i = 0; i < points_amount; i++) {
+            x += 0.1;
+            y = Math.sin(x);
+            series.appendData(new DataPoint(x, y), true, points_amount);
+        }
+        graph.addSeries(series);
     }
 }
