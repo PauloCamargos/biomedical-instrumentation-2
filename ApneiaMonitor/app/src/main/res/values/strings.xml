@@ -19,10 +19,32 @@
     <string name="button_cancelar">Cancelar</string>
     <string name="text_instrucao_expiracao">Realize a respiração por 5 vezes de forma normal.</string>
     <string name="text_inpiracao_instrucao">Realize a respiração por 5 vezes de forma normal.</string>
+    <string name="lbl_tempo_limite">Tempo limite para alarme</string>
+    <string name="lbl_limite_expansao">Limite de expansão</string>
+    <string name="lbl_btn_iniciar">Iniciar</string>
+    <string name="lbl_visualizar_grafico">Visualizar gráfico</string>
+    <string name="txt_hora_inicial">Hora inicial</string>
+    <string name="txt_hora_final">Hora final</string>
+    <string name="btn_gerar_relatorio">Gerar relatório</string>
+    <string name="btn_gerar_grafico">Gerar gráfico</string>
 
     <string-array name="dispositivos_disponiveis">
         <item>Dispositivo 1</item>
         <item>Dispositivo 2</item>
         <item>Dispositivo 3</item>
+    </string-array>
+
+    <string-array name="tempos_alarme">
+        <item>15 segundos</item>
+        <item>30 segundos</item>
+        <item>1 minuto</item>
+        <item>2 minutos</item>
+    </string-array>
+
+    <string-array name="limites_expansao">
+        <item>50%</item>
+        <item>30%</item>
+        <item>20%</item>
+        <item>0%</item>
     </string-array>
 </resources>

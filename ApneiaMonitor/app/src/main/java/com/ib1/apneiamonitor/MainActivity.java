@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity implements
         AdapterView.OnItemSelectedListener  {
     // Tag for the intent extra.
     public static final String EXTRA_MESSAGE =
-            "com.example.android.droidcafe.extra.MESSAGE";
+            "com.ib1.apneiamonitor.extra.MESSAGE";
     private TextView mTextMessage;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_inicio:
-                    mTextMessage.setText(R.string.title_inicio);
                     return true;
                 case R.id.navigation_alarme:
 //                    mTextMessage.setText(R.string.title_alarme);
