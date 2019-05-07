@@ -8,7 +8,7 @@
     <string name="button_conectar">Conectar</string>
     <string name="buscar_conexoes">Buscar conexões</string>
     <string name="dispositivo_conectado">Dispostivo conectado: </string>
-    <string name="nenhum_dispositivo_conectado">Nenhum dispositivo conectado</string>
+    <string name="status_dispositivo_conectado">Nenhum dispositivo conectado</string>
     <string name="button_iniciar_calibracao">Iniciar calibração</string>
     <string name="label_maximo_medido">Máximo medido</string>
     <string name="label_inspiracao">Inspiração</string>
@@ -28,6 +28,8 @@
     <string name="btn_gerar_relatorio">Gerar relatório</string>
     <string name="btn_gerar_grafico">Gerar gráfico</string>
     <string name="text_grafico">Gráfico</string>
+    <string name="lbl_valor_lido">Valor lido:</string>
+    <string name="txt_valor_lido">Valor lido</string>
 
     <string-array name="dispositivos_disponiveis">
         <item>Dispositivo 1</item>

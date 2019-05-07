@@ -27,7 +27,7 @@ void setup() {
 
 void loop() {
   // valor lido do tecido, entre 0-255
-//  byte val = map(analogRead(ANALOG_PIN), 0,1023,0,255);
+  //byte val = map(analogRead(ANALOG_PIN), 0,1023,0,255);
   float val = (analogRead(ANALOG_PIN) * 5.0 )/1023.0;
 
   // incluindo o valor no array de stat
@@ -39,19 +39,20 @@ void loop() {
   float mean_val = stat.mean();
 
   // se media menor que o ponto central, apitar alarme
-  if(mean_val <= middle){
+ float limite = middle * 1;
+  if(mean_val <= limite){
     triggerAlarm();
   }
 
-
   // exibindo no serial monitor
-//  Serial.println("Agora: " + String (val));
-//  Serial.println("Media: " + String (mean_val) + "\n----");
-//  Serial.println("Limite: " + String (middle));
+  Serial.println("A " + String (val));
+  Serial.println("L " + String (limite));
+  Serial.println("M " + String (mean_val) + "\n----");
 
-  Serial.println(val);
+//  Serial.println(val);
   // enviando para smartphone
-  blth.write(val);
+  blth.print(val);
+  blth.print("\n");
   delay(100);
 }
 

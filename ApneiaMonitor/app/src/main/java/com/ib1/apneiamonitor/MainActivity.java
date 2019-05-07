@@ -1,7 +1,10 @@
 package com.ib1.apneiamonitor;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,7 +23,68 @@ public class MainActivity extends AppCompatActivity implements
     // Tag for the intent extra.
     public static final String EXTRA_MESSAGE =
             "com.ib1.apneiamonitor.extra.MESSAGE";
-    private TextView mTextMessage;
+    static TextView statusConexaoBth;
+    static TextView valorLidoBth;
+    ConnectionThread connect;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        BottomNavigationView navView = findViewById(R.id.nav_view);
+        statusConexaoBth = findViewById(R.id.status_dispositivo_conectado);
+        valorLidoBth = findViewById(R.id.valor_lido_bth);
+
+        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+        Spinner spinner = findViewById(R.id.spinner_conexao);
+        if (spinner != null) {
+            spinner.setOnItemSelectedListener(this);
+        }
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.dispositivos_disponiveis, android.R.layout.simple_spinner_item);
+
+        // Specify the layout to use when the list of choices appears.
+        adapter.setDropDownViewResource
+                (android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner.
+        if (spinner != null) {
+            spinner.setAdapter(adapter);
+        }
+
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (btAdapter == null) {
+            statusConexaoBth.setText("Que pena! Hardware Bluetooth não está funcionando :(");
+        } else {
+            statusConexaoBth.setText("Ótimo! Hardware Bluetooth está funcionando :)");
+        }
+
+        /* A chamada do seguinte método liga o Bluetooth no dispositivo Android
+            sem pedido de autorização do usuário. É altamente não recomendado no
+            Android Developers, mas, para simplificar este app, que é um demo,
+            faremos isso. Na prática, em um app que vai ser usado por outras
+            pessoas, não faça isso.
+         */
+        btAdapter.enable();
+
+        /* Definição da thread de conexão como cliente.
+            Aqui, você deve incluir o endereço MAC do seu módulo Bluetooth.
+            O app iniciará e vai automaticamente buscar por esse endereço.
+            Caso não encontre, dirá que houve um erro de conexão.
+         */
+        connect = new ConnectionThread("00:18:E4:40:00:06");
+        connect.start();
+
+        /* Um descanso rápido, para evitar bugs esquisitos.
+         */
+        try {
+            Thread.sleep(1000);
+        } catch (Exception E) {
+            E.printStackTrace();
+        }
+
+    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -53,33 +117,63 @@ public class MainActivity extends AppCompatActivity implements
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        BottomNavigationView navView = findViewById(R.id.nav_view);
-        mTextMessage = findViewById(R.id.message);
-        navView.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
-        Spinner spinner = findViewById(R.id.spinner_conexao);
-        if (spinner != null) {
-            spinner.setOnItemSelectedListener(this);
-        }
+        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.dispositivos_disponiveis, android.R.layout.simple_spinner_item);
-
-        // Specify the layout to use when the list of choices appears.
-        adapter.setDropDownViewResource
-                (android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner.
-        if (spinner != null) {
-            spinner.setAdapter(adapter);
-        }
-        // ... End of onCreate code ...
-
+        return super.onOptionsItemSelected(item);
     }
 
+    public static Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
 
+            /* Esse método é invocado na Activity principal
+                sempre que a thread de conexão Bluetooth recebe
+                uma mensagem.
+             */
+            Bundle bundle = msg.getData();
+            byte[] data = bundle.getByteArray("data");
+            String dataString= new String(data);
+
+            /* Aqui ocorre a decisão de ação, baseada na string
+                recebida. Caso a string corresponda à uma das
+                mensagens de status de conexão (iniciadas com --),
+                atualizamos o status da conexão conforme o código.
+             */
+            if(dataString.equals("---N"))
+                statusConexaoBth.setText("Ocorreu um erro durante a conexão D:");
+            else if(dataString.equals("---S"))
+                statusConexaoBth.setText("Conectado :D");
+            else {
+
+                /* Se a mensagem não for um código de status,
+                    então ela deve ser tratada pelo aplicativo
+                    como uma mensagem vinda diretamente do outro
+                    lado da conexão. Nesse caso, simplesmente
+                    atualizamos o valor contido no TextView do
+                    contador.
+                 */
+                valorLidoBth.setText(dataString);
+            }
+
+        }
+    };
+
+    /* Esse método é invocado sempre que o usuário clicar na TextView
+        que contem o contador. O app Android transmite a string "restart",
+        seguido de uma quebra de linha, que é o indicador de fim de mensagem.
+     */
+    public void restartCounter(View view) {
+        connect.write("restart\n".getBytes());
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
