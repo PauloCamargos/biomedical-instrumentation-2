@@ -1,0 +1,12 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+actor Usuário
+
+rectangle "Apneia Monitor" {
+    Usuário -- (Realizar \ncalibração)
+    Usuário -- (Visualizar curva \nde expansão)
+    Usuário -- (Alterar limites \nde alarme)
+    Usuário -- (Visualizar \nhistórico)
+}
+@enduml

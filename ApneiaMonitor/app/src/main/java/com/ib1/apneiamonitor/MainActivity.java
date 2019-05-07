@@ -36,12 +36,13 @@ public class MainActivity extends AppCompatActivity implements
     static String blth_address = "00:18:E4:40:00:06";
     ConnectionThread connect;
 
-    private final Handler mHandler = new Handler();
-    private Runnable mTimer1;
-    private LineGraphSeries<DataPoint> mSeries1;
+    //    private final Handler mHandler = new Handler();
+//    private Runnable mTimer1;
+    static LineGraphSeries<DataPoint> mSeries1;
+    static int lastX = 0;
 
-    static int points_amount = 100;
-    DataPoint[] values = new DataPoint[points_amount];
+//    static int points_amount = 100;
+//    DataPoint[] values = new DataPoint[points_amount];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,63 +101,68 @@ public class MainActivity extends AppCompatActivity implements
         } catch (Exception E) {
             E.printStackTrace();
         }
-        for (int i = 0; i < points_amount; i++) {
-            values[i] = new DataPoint(i, 1);
-        }
+//        for (int i = 0; i < points_amount; i++) {
+//            values[i] = new DataPoint(i, 1);
+//        }
         GraphView graph = (GraphView) findViewById(R.id.graph);
-        mSeries1 = new LineGraphSeries<>(generateData());
+        mSeries1 = new LineGraphSeries<DataPoint>();
         graph.addSeries(mSeries1);
 
         Viewport viewport = graph.getViewport();
         viewport.setYAxisBoundsManual(true);
-        viewport.setMinY(0.6);
-        viewport.setMinY(1.2);
+//        viewport.setXAxisBoundsManual(true);
+        viewport.setMinY(0);
+        viewport.setMaxY(255);
         viewport.setScrollable(true);
 
 
     }
 
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mTimer1 = new Runnable() {
-            @Override
-            public void run() {
-                mSeries1.resetData(generateData());
-                mHandler.postDelayed(this, 200);
-            }
-        };
-        mHandler.postDelayed(mTimer1, 200);
+    static void addEntry(String dataString) {
+        mSeries1.appendData(new DataPoint(lastX++, Double.parseDouble((String) dataString)), false, 50);
     }
 
-    @Override
-    public void onPause() {
-        mHandler.removeCallbacks(mTimer1);
-        super.onPause();
-    }
 
-    private DataPoint[] generateData() {
-        double x = values.length+1;
-//        double f = mRand.nextDouble() * 0.15 + 0.3;
-//        double y = Math.sin(i * f + 2) + mRand.nextDouble() * 0.3;
-        double y = Double.parseDouble((String) valorLidoBth.getText());
-
-        for (int i = 0; i < 99; i++) {
-            values[i] = values[i + 1];
-
-        }
-        DataPoint v = new DataPoint(x, y);
-        values[99] = v;
-        return values;
-    }
-
-    double mLastRandom = 2;
-    Random mRand = new Random();
-
-    private double getRandom() {
-        return mLastRandom += mRand.nextDouble() * 0.5 - 0.25;
-    }
+    //    @Override
+//    public void onResume() {
+//        super.onResume();
+//        mTimer1 = new Runnable() {
+//            @Override
+//            public void run() {
+//                mSeries1.resetData(generateData());
+//                mHandler.postDelayed(this, 200);
+//            }
+//        };
+//        mHandler.postDelayed(mTimer1, 200);
+//    }
+//
+//    @Override
+//    public void onPause() {
+//        mHandler.removeCallbacks(mTimer1);
+//        super.onPause();
+//    }
+//
+//    private DataPoint[] generateData() {
+//        double x = values.length+1;
+////        double f = mRand.nextDouble() * 0.15 + 0.3;
+////        double y = Math.sin(i * f + 2) + mRand.nextDouble() * 0.3;
+//        double y = Double.parseDouble((String) valorLidoBth.getText());
+//
+//        for (int i = 0; i < 99; i++) {
+//            values[i] = values[i + 1];
+//
+//        }
+//        DataPoint v = new DataPoint(x, y);
+//        values[99] = v;
+//        return values;
+//    }
+//
+//    double mLastRandom = 2;
+//    Random mRand = new Random();
+//
+//    private double getRandom() {
+//        return mLastRandom += mRand.nextDouble() * 0.5 - 0.25;
+//    }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -234,6 +240,7 @@ public class MainActivity extends AppCompatActivity implements
                     contador.
                  */
                 valorLidoBth.setText(dataString);
+                addEntry(dataString);
             }
 
         }

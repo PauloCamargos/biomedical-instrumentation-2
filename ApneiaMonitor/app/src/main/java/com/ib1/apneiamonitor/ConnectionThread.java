@@ -181,7 +181,7 @@ public class ConnectionThread extends Thread{
 
                     /*  A mensagem recebida é enviada para a Activity principal.
                      */
-                    toMainActivity(Arrays.copyOfRange(buffer, 0, bytesRead-1));
+                    toMainActivity(Arrays.copyOfRange(buffer, 0, bytesRead));
 
                 }
 

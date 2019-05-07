@@ -1,0 +1,9 @@
+@startuml
+"Início \nleitura" -> "Mapeamento \n de valores"
+"Mapeamento \n de valores" -> "Inclusão \nem vetor" 
+"Inclusão \nem vetor" -> "Cálculo \nde média"
+"Cálculo \nde média" -> "Cálculo \nDP"
+if "DP < 40"
+    -->[true] "Alarme"
+"Cálculo \nDP" -> "Transmissão \nBT"
+@enduml

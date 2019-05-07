@@ -1,0 +1,11 @@
+@startuml
+(*) --> "Conectar com smartphone"
+
+if "Primeira utilização" then
+-->[true] "Realizar calibração"
+--> "Iniciar coleta"
+else
+  -->"Iniciar coleta"
+Endif
+--> (*)
+@enduml

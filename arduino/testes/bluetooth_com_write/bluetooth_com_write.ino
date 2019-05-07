@@ -14,11 +14,11 @@
 SoftwareSerial blth(RX,TX);
 
 // instanciando Statistics com 10 valores
-Statistics stat(10);
-
+Statistics stat(50);
+int count = 0;
 void setup() {
   //inciando comunicacao no serial monitor e bluetooth
-  Serial.begin(9600);
+  //Serial.begin(115200);
   blth.begin(9600);
 
   // iniciando estatistica (stat)
@@ -27,34 +27,38 @@ void setup() {
 
 void loop() {
   // valor lido do tecido, entre 0-255
-  //byte val = map(analogRead(ANALOG_PIN), 0,1023,0,255);
-  float val = (analogRead(ANALOG_PIN) * 5.0 )/1023.0;
-
+  byte val = map(analogRead(ANALOG_PIN), 0,1023,0,255);
+  byte mappedVal = map(val,40,70,0,255);
+  
   // incluindo o valor no array de stat
-  stat.addData(val);
+  stat.addData(mappedVal);
 
-  // ponto central (max_lido + min_lido / 2)
-  float middle = (stat.maxVal() + stat.minVal()) / 2.0;
-  // calculo media
-  float mean_val = stat.mean();
+  // media e desvio padrao
+  float meanVal = stat.mean();
+  float stdDev = stat.stdDeviation();
 
-  // se media menor que o ponto central, apitar alarme
- float limite = middle * 1;
-  if(mean_val <= limite){
-    triggerAlarm();
+  int mappedMean = map(meanVal,110,190, 0,255);
+
+  // soa alarme de desvio padrao < 40
+  if(stdDev <= 40){
+      triggerAlarm();
   }
 
+  //int mapped_value = map(mean_val, 40,80,0,255); 
+
   // exibindo no serial monitor
-  Serial.println("A " + String (val));
-  Serial.println("L " + String (limite));
-  Serial.println("M " + String (mean_val) + "\n----");
+//  Serial.println("A " + String (mappedVal));
+//  Serial.println("L " + String (limite));
+
+//  Serial.println("S " + String (stdDev));
+//  Serial.println("M " + String (mean_val) + "\n----");
 
 //  Serial.println(val);
   // enviando para smartphone
-  int mapped_value = map(val*100, 250,300,0,255); 
-  blth.print(val);
+  
+  blth.print(mappedVal);
   blth.print("\n");
-  delay(50);
+  delay(80);
 }
 
 void triggerAlarm(){
