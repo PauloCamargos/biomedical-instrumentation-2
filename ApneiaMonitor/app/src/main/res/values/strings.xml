@@ -29,7 +29,7 @@
     <string name="btn_gerar_grafico">Gerar gráfico</string>
     <string name="text_grafico">Gráfico</string>
     <string name="lbl_valor_lido">Valor lido:</string>
-    <string name="txt_valor_lido">Valor lido</string>
+    <string name="txt_valor_lido">0</string>
 
     <string-array name="dispositivos_disponiveis">
         <item>Dispositivo 1</item>

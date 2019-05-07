@@ -51,9 +51,10 @@ void loop() {
 
 //  Serial.println(val);
   // enviando para smartphone
+  int mapped_value = map(val*100, 250,300,0,255); 
   blth.print(val);
   blth.print("\n");
-  delay(100);
+  delay(50);
 }
 
 void triggerAlarm(){

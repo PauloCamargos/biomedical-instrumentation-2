@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,6 +18,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.Viewport;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.LineGraphSeries;
+
+import java.util.Random;
+import java.util.logging.Logger;
 
 public class MainActivity extends AppCompatActivity implements
         AdapterView.OnItemSelectedListener {
@@ -25,7 +33,15 @@ public class MainActivity extends AppCompatActivity implements
             "com.ib1.apneiamonitor.extra.MESSAGE";
     static TextView statusConexaoBth;
     static TextView valorLidoBth;
+    static String blth_address = "00:18:E4:40:00:06";
     ConnectionThread connect;
+
+    private final Handler mHandler = new Handler();
+    private Runnable mTimer1;
+    private LineGraphSeries<DataPoint> mSeries1;
+
+    static int points_amount = 100;
+    DataPoint[] values = new DataPoint[points_amount];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,17 +89,73 @@ public class MainActivity extends AppCompatActivity implements
             O app iniciará e vai automaticamente buscar por esse endereço.
             Caso não encontre, dirá que houve um erro de conexão.
          */
-        connect = new ConnectionThread("00:18:E4:40:00:06");
+
+        connect = new ConnectionThread(blth_address);
         connect.start();
 
         /* Um descanso rápido, para evitar bugs esquisitos.
          */
         try {
-            Thread.sleep(1000);
+            Thread.sleep(100);
         } catch (Exception E) {
             E.printStackTrace();
         }
+        for (int i = 0; i < points_amount; i++) {
+            values[i] = new DataPoint(i, 1);
+        }
+        GraphView graph = (GraphView) findViewById(R.id.graph);
+        mSeries1 = new LineGraphSeries<>(generateData());
+        graph.addSeries(mSeries1);
 
+        Viewport viewport = graph.getViewport();
+        viewport.setYAxisBoundsManual(true);
+        viewport.setMinY(0.6);
+        viewport.setMinY(1.2);
+        viewport.setScrollable(true);
+
+
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mTimer1 = new Runnable() {
+            @Override
+            public void run() {
+                mSeries1.resetData(generateData());
+                mHandler.postDelayed(this, 200);
+            }
+        };
+        mHandler.postDelayed(mTimer1, 200);
+    }
+
+    @Override
+    public void onPause() {
+        mHandler.removeCallbacks(mTimer1);
+        super.onPause();
+    }
+
+    private DataPoint[] generateData() {
+        double x = values.length+1;
+//        double f = mRand.nextDouble() * 0.15 + 0.3;
+//        double y = Math.sin(i * f + 2) + mRand.nextDouble() * 0.3;
+        double y = Double.parseDouble((String) valorLidoBth.getText());
+
+        for (int i = 0; i < 99; i++) {
+            values[i] = values[i + 1];
+
+        }
+        DataPoint v = new DataPoint(x, y);
+        values[99] = v;
+        return values;
+    }
+
+    double mLastRandom = 2;
+    Random mRand = new Random();
+
+    private double getRandom() {
+        return mLastRandom += mRand.nextDouble() * 0.5 - 0.25;
     }
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -141,17 +213,17 @@ public class MainActivity extends AppCompatActivity implements
              */
             Bundle bundle = msg.getData();
             byte[] data = bundle.getByteArray("data");
-            String dataString= new String(data);
+            String dataString = new String(data);
 
             /* Aqui ocorre a decisão de ação, baseada na string
                 recebida. Caso a string corresponda à uma das
                 mensagens de status de conexão (iniciadas com --),
                 atualizamos o status da conexão conforme o código.
              */
-            if(dataString.equals("---N"))
+            if (dataString.equals("---N"))
                 statusConexaoBth.setText("Ocorreu um erro durante a conexão D:");
-            else if(dataString.equals("---S"))
-                statusConexaoBth.setText("Conectado :D");
+            else if (dataString.equals("---S"))
+                statusConexaoBth.setText(blth_address);
             else {
 
                 /* Se a mensagem não for um código de status,
