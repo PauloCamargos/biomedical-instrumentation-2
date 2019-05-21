@@ -3,46 +3,51 @@
 //https://github.com/provideyourown/statistics
 #include "pitches.h"
 
-#define fa 100 // frequencia de amostragem em hz
+// PARAMETROS CONFIGURAVEIS
+#define FA 10               // frequencia de amostragem [hz]
+#define QNT_AMOSTRAS 100        // qnt amostras no vetor
 
-#define TX 11 // pino tx
-#define RX 12 // pino rx
-#define ANALOG_PIN A7 // leitua do tecido
-#define SOUND_PIN 13 // ouput buzzer
-#define NOTE_FRACTION 20 // fracao de segundo do som
-#define NOTE NOTE_A7 // nota musical do buzzer
+// PARAMETROS DO PROGRAMA
+#define TX 11             // pino tx (ard)
+#define RX 12             // pino rx (ard)
+#define ANALOG_PIN A7     // pino leitura do tecido
+#define SOUND_PIN 13      // ouput buzzer
+#define NOTE_FRACTION 20  // fracao de segundo do som
+#define NOTE NOTE_A7      // nota musical do buzzer
+#define BAUD_RATE 115200  // baud rate
 
 // instanciando pino tx e rx do bluetooth
 SoftwareSerial blth(RX, TX);
 
 // instanciando Statistics com 10 valores
-Statistics stat(50);
+Statistics stat(QNT_AMOSTRAS);
 int count = 0;
-float ta = (1.0 / fa) * 1000.0; // tempo de amostragem em ms
+float TA = (1.0 / FA) * 1000.0; // tempo de amostragem em ms
 unsigned long time_now = 0;
+unsigned long time_to_alarm = 0;
+
+int val;
+float meanVal;
+float maxVal;
+float minVal;
+float stdDev;
+float std_alarm = 15;        // desvio padrao limite para alarme
+float carencia = 5;          // tempo para disparo de alarme [s]
 
 void setup() {
   //inciando comunicacao no serial monitor e bluetooth
-  Serial.begin(115200);
-//  blth.begin(9600);
-
+  Serial.begin(BAUD_RATE);
+  //  blth.begin(9600);
   // iniciando estatistica (stat)
   stat.reset();
 }
 
 void loop() {
-  float meanVal;
-  float stdDev;
-  // Quando o tecido eh distendido, a resistência cai
-  // A res cai a qual taxa?
-  // Exite um tempo de recuperação do tecido?
-  // Qual a durabilidade do tecido?
-
   time_now = millis();
-  if (millis() < time_now + ta) {
+  if (millis() < time_now + TA) {
 
     // valor lido do tecido, entre 0-255
-    int val = analogRead(ANALOG_PIN);
+    val = analogRead(ANALOG_PIN);
     //  byte mappedVal = map(val,40,70,0,255);
 
     // incluindo o valor no array de stat
@@ -52,18 +57,30 @@ void loop() {
     meanVal = stat.mean();
     stdDev = stat.stdDeviation();
 
-    int mappedMean = map(meanVal, 0, 1023, 0, 255);
+    byte mappedMean = map(meanVal, 0, 1023, 0, 255);
 
     // soa alarme de desvio padrao < 40
-    if (stdDev <= 40) {
-      triggerAlarm();
+    if (stdDev <= std_alarm) {
+      if (millis() > (time_to_alarm + carencia * 1000)) {
+        triggerAlarm();
+      }
+    } else {
+      time_to_alarm = millis();
     }
-      Serial.println(meanVal);
-//      Serial.print(","); 
-//      Serial.println(stdDev);
+    
+    Serial.print(0);  // To freeze the lower limit
+    Serial.print(" ");
+    Serial.print(255);  // To freeze the upper limit
+    Serial.print(" ");
+    Serial.print(mappedMean);
+    Serial.print(" ");
+    Serial.println(stdDev);
 
-//    blth.print(meanVal);
-//    blth.print("\n");
+    //      Serial.print(",");
+    //      Serial.println(stdDev);
+
+    //    blth.print(meanVal);
+    //    blth.print("\n");
   }
 
 }
