@@ -8,8 +8,8 @@
 #define QNT_AMOSTRAS 100        // qnt amostras no vetor
 
 // PARAMETROS DO PROGRAMA
-#define TX 11             // pino tx (ard)
-#define RX 12             // pino rx (ard)
+#define TX 11             // pino tx (blth)
+#define RX 12             // pino rx (blth)
 #define ANALOG_PIN A7     // pino leitura do tecido
 #define SOUND_PIN 13      // ouput buzzer
 #define NOTE_FRACTION 20  // fracao de segundo do som
@@ -21,7 +21,6 @@ SoftwareSerial blth(RX, TX);
 
 // instanciando Statistics com 10 valores
 Statistics stat(QNT_AMOSTRAS);
-int count = 0;
 float TA = (1.0 / FA) * 1000.0; // tempo de amostragem em ms
 unsigned long time_now = 0;
 unsigned long time_to_alarm = 0;
@@ -37,13 +36,15 @@ float carencia = 5;          // tempo para disparo de alarme [s]
 void setup() {
   //inciando comunicacao no serial monitor e bluetooth
   Serial.begin(BAUD_RATE);
-  //  blth.begin(9600);
+  blth.begin(9600);
   // iniciando estatistica (stat)
   stat.reset();
 }
 
 void loop() {
   time_now = millis();
+  maxVal = stat.maxVal();
+  minVal = stat.minVal();
   if (millis() < time_now + TA) {
 
     // valor lido do tecido, entre 0-255
@@ -57,7 +58,7 @@ void loop() {
     meanVal = stat.mean();
     stdDev = stat.stdDeviation();
 
-    byte mappedMean = map(meanVal, 0, 1023, 0, 255);
+    byte mappedMean = map(meanVal, minVal, maxVal, 0, 255);
 
     // soa alarme de desvio padrao < 40
     if (stdDev <= std_alarm) {
@@ -79,8 +80,8 @@ void loop() {
     //      Serial.print(",");
     //      Serial.println(stdDev);
 
-    //    blth.print(meanVal);
-    //    blth.print("\n");
+        blth.print(mappedMean);
+        blth.print("\n");
   }
 
 }
