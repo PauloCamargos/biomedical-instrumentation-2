@@ -9,8 +9,8 @@
 #define QNT_AMOSTRAS 10        // qnt amostras no vetor
 
 // CONSTANTES
-#define START "s"
-#define END "e"
+#define START "$S$"
+#define END "$E$"
 
 // PARAMETROS DO PROGRAMA
 #define TX 11             // pino tx (blth)
@@ -37,6 +37,7 @@ float stdDev;
 float std_alarm = 15;        // desvio padrao limite para alarme
 float carencia = 5;          // tempo para disparo de alarme [s]
 float TA = (1.0 / FA) * 1000000.0; // tempo de amostragem em us
+float limiar_std = 0;
 
 char lixo;
 String data = "";
@@ -47,7 +48,6 @@ void setup() {
   blth.begin(9600);
   // iniciando estatistica (stat)
   stat.reset();
-
 }
 
 void loop() {
@@ -56,6 +56,10 @@ void loop() {
     while (blth.available()) {
       char inChar = (char) blth.read();
       data += inChar;
+      if(data == START){
+        limiar_std = (float) blth.read();
+        break;
+      }
     }
     while (blth.available() > 0) {
       lixo = blth.read();
@@ -64,12 +68,8 @@ void loop() {
     if (data == START) {
       Timer1.initialize(TA);
       Timer1.attachInterrupt(sendSignal);
-      digitalWrite(LED_BUILTIN, HIGH);
-
     } else if (data == END) {
       Timer1.detachInterrupt();
-      digitalWrite(LED_BUILTIN, LOW);
-      Serial.println(data);
     }
 
     data = "";
@@ -95,14 +95,14 @@ void sendSignal() {
 
   byte mappedMean = map(meanVal, minVal, maxVal, 0, 255);
 
-  // soa alarme de desvio padrao < 40
-//  if (stdDev <= std_alarm) {
-//    if (millis() > (time_to_alarm + carencia * 1000)) {
-//      triggerAlarm();
-//    }
-//  } else {
-//    time_to_alarm = millis();
-//  }
+//   soa alarme de desvio padrao < 40
+  if (stdDev <= std_alarm) {
+    if (millis() > (time_to_alarm + carencia * 1000)) {
+      triggerAlarm();
+    }
+  } else {
+    time_to_alarm = millis();
+  }
 
   Serial.print(0);  // To freeze the lower limit
   Serial.print(" ");
