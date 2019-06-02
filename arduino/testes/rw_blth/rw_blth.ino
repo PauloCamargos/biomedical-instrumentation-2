@@ -66,6 +66,7 @@ void loop() {
     }
 
     if (data == START) {
+      startCalibration();
       Timer1.initialize(TA);
       Timer1.attachInterrupt(sendSignal);
     } else if (data == END) {
@@ -76,6 +77,7 @@ void loop() {
   }
 
 }
+
 void sendSignal() {
   //  time_now = millis();
   maxVal = stat.maxVal();
