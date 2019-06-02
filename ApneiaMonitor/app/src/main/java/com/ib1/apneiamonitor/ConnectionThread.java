@@ -85,7 +85,7 @@ public class ConnectionThread extends Thread{
                 a conexão falhou.
                  */
                 e.printStackTrace();
-                toMainActivity("---N".getBytes());
+                toAlarmeActivity("---N".getBytes());
             }
 
 
@@ -123,7 +123,7 @@ public class ConnectionThread extends Thread{
                 a conexão falhou.
                  */
                 e.printStackTrace();
-                toMainActivity("---N".getBytes());
+                toAlarmeActivity("---N".getBytes());
             }
 
         }
@@ -138,7 +138,7 @@ public class ConnectionThread extends Thread{
             a conexão ocorreu com sucesso.
              */
             this.isConnected = true;
-            toMainActivity("---S".getBytes());
+            toAlarmeActivity("---S".getBytes());
 
             try {
 
@@ -181,7 +181,7 @@ public class ConnectionThread extends Thread{
 
                     /*  A mensagem recebida é enviada para a Activity principal.
                      */
-                    toMainActivity(Arrays.copyOfRange(buffer, 0, bytesRead));
+                    toAlarmeActivity(Arrays.copyOfRange(buffer, 0, bytesRead));
 
                 }
 
@@ -192,7 +192,7 @@ public class ConnectionThread extends Thread{
                 a conexão falhou.
                  */
                 e.printStackTrace();
-                toMainActivity("---N".getBytes());
+                toAlarmeActivity("---N".getBytes());
                 this.isConnected = false;
             }
         }
@@ -203,13 +203,13 @@ public class ConnectionThread extends Thread{
         O byte array é encapsulado em um Bundle e posteriormente em uma Message
     antes de ser enviado.
      */
-    private void toMainActivity(byte[] data) {
+    private void toAlarmeActivity(byte[] data) {
 
         Message message = new Message();
         Bundle bundle = new Bundle();
         bundle.putByteArray("data", data);
         message.setData(bundle);
-        MainActivity.handler.sendMessage(message);
+        Alarme.handler.sendMessage(message);
     }
 
     /*  Método utilizado pela Activity principal para transmitir uma mensagem ao
@@ -217,7 +217,11 @@ public class ConnectionThread extends Thread{
         A mensagem deve ser representada por um byte array.
      */
     public void write(byte[] data) {
-
+//        try {
+//            output.write(data);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         if(output != null) {
             try {
 
@@ -232,7 +236,7 @@ public class ConnectionThread extends Thread{
 
             /*  Envia à Activity principal um código de erro durante a conexão.
              */
-            toMainActivity("---N".getBytes());
+            toAlarmeActivity("---N".getBytes());
         }
     }
 
