@@ -9,8 +9,9 @@
 #define QNT_AMOSTRAS 10        // qnt amostras no vetor
 
 // CONSTANTES
-#define START "$S$"
-#define END "$E$"
+#define DELIMITADOR '$'
+#define START 'S'
+#define END 'E'
 
 // PARAMETROS DO PROGRAMA
 #define TX 11             // pino tx (blth)
@@ -19,13 +20,15 @@
 #define SOUND_PIN 13      // ouput buzzer
 #define NOTE_FRACTION 20  // fracao de segundo do som
 #define NOTE NOTE_A7      // nota musical do buzzer
-#define BAUD_RATE 9600  // baud rate
+#define BAUD_RATE 115200  // baud rate
 
 // instanciando pino tx e rx do bluetooth
 SoftwareSerial blth(RX, TX);
 
 // instanciando Statistics com 10 valores
-Statistics stat(QNT_AMOSTRAS);
+Statistics breath_signal(QNT_AMOSTRAS);
+Statistics stdev_calibration(10.0 * FA);
+
 unsigned long time_now = 0;
 unsigned long time_to_alarm = 0;
 
@@ -35,53 +38,87 @@ float maxVal;
 float minVal;
 float stdDev;
 float std_alarm = 15;        // desvio padrao limite para alarme
-float carencia = 5;          // tempo para disparo de alarme [s]
+int tempo_alarme = 5;          // tempo para disparo de alarme [s]
+int limiar_std = 0;
+
 float TA = (1.0 / FA) * 1000000.0; // tempo de amostragem em us
-float limiar_std = 0;
 
 char lixo;
 String data = "";
+int counter = 0;
 
 void setup() {
   //inciando comunicacao no serial monitor e bluetooth
   Serial.begin(BAUD_RATE);
   blth.begin(9600);
   // iniciando estatistica (stat)
-  stat.reset();
+  breath_signal.reset();
+  stdev_calibration.reset();
 }
 
 void loop() {
   if (blth.available()) {
-    // Checando se estamos recebendo sinal
-    while (blth.available()) {
-      char inChar = (char) blth.read();
-      data += inChar;
-      if(data == START){
-        limiar_std = (float) blth.read();
-        break;
-      }
+    char incomingChar = (char) blth.read();
+    if (incomingChar == DELIMITADOR) {
+      char commandChar = (char) blth.read();
+      Serial.println(commandChar);
     }
-    while (blth.available() > 0) {
-      lixo = blth.read();
+//      switch (commandChar) {
+//        case START:
+//          String tempo_limite;
+//          String alarme_limite;
+//          lixo = blth.read();
+//          do {
+//            incomingChar = blth.read();
+//            tempo_limite += incomingChar;
+//          } while (incomingChar != DELIMITADOR);
+//
+//          do {
+//            incomingChar = blth.read();
+//            alarme_limite += incomingChar;
+//          } while (incomingChar != END);
+//          tempo_alarme = tempo_limite.toInt();
+//          limiar_std = alarme_limite.toInt();
+//          Serial.println(tempo_limite);
+//          Serial.println(alarme_limite);
+//          break;
+//        case END:
+//          break;
+//      }
+
     }
 
-    if (data == START) {
-      startCalibration();
-      Timer1.initialize(TA);
-      Timer1.attachInterrupt(sendSignal);
-    } else if (data == END) {
-      Timer1.detachInterrupt();
-    }
-
-    data = "";
+    //    if(charDelimitador == DELIMITADOR){
+    //      char charComando = (char) blth.read();
+    //      if(charComando == 'S'){
+    //        Serial.println(charComando);
+    //      }
   }
 
-}
+  //    while (blth.available()) {
+  //      char inChar = (char) blth.read();
+  //      data += inChar;
+  //    }
+  //    Serial.print(data);
+  //
+  //    while (blth.available() > 0) {
+  //      lixo = blth.read();
+  //    }
+  //    blth.flush();
+  //    if (data == START) {
+  //      Timer1.initialize(TA);
+  //      Timer1.attachInterrupt(sendSignal);
+  //    } else if (data == END) {
+  //      Timer1.detachInterrupt();
+  //    }
+  //    data = "";
+
+
 
 void sendSignal() {
   //  time_now = millis();
-  maxVal = stat.maxVal();
-  minVal = stat.minVal();
+  maxVal = breath_signal.maxVal();
+  minVal = breath_signal.minVal();
   //  if (millis() < time_now + TA) {
 
   // valor lido do tecido, entre 0-255
@@ -89,17 +126,24 @@ void sendSignal() {
   //  byte mappedVal = map(val,40,70,0,255);
 
   // incluindo o valor no array de stat
-  stat.addData(val);
+  breath_signal.addData(val);
 
   // media e desvio padrao
-  meanVal = stat.mean();
-  stdDev = stat.stdDeviation();
+  meanVal = breath_signal.mean();
+  stdDev = breath_signal.stdDeviation();
+  // Calibrando nos 10s iniciais
+  if (counter <= (10 * FA)) {
+    counter++;
+    stdev_calibration.addData(stdDev);
+  } else if (counter == (10 * FA)) {
+    std_alarm = limiar_std * stdev_calibration.mean();
+  }
 
   byte mappedMean = map(meanVal, minVal, maxVal, 0, 255);
 
-//   soa alarme de desvio padrao < 40
+  //   soa alarme de desvio padrao < 40
   if (stdDev <= std_alarm) {
-    if (millis() > (time_to_alarm + carencia * 1000)) {
+    if (millis() > (time_to_alarm + tempo_alarme * 1000)) {
       triggerAlarm();
     }
   } else {

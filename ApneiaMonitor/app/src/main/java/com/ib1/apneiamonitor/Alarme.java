@@ -18,11 +18,14 @@ import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.io.UnsupportedEncodingException;
+
 public class Alarme extends AppCompatActivity implements
         AdapterView.OnItemSelectedListener {
 
-    public static final String INICIAR_TRANSMISSAO = "s";
-    public static final String PARAR_TRANSMISSAO = "e";
+    public static final String CHAR_INICIO = "S";
+    public static final String CHAR_FIM = "E";
+    public static final String CHAR_CONTROLE = "$";
 
     static TextView statusConexaoBth;
 
@@ -33,6 +36,10 @@ public class Alarme extends AppCompatActivity implements
 
     ConnectionThread connect;
     static String blth_address = "00:18:E4:40:00:06";
+
+    public Byte tempo_limite;
+    public Byte expansao_limite;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +83,7 @@ public class Alarme extends AppCompatActivity implements
 //        btAdapter.enable();
 
 //        if (btAdapter.isEnabled()) {
-            // iniciar thread de conexao
+        // iniciar thread de conexao
         connect = new ConnectionThread(blth_address);
         connect.start();
 //        }
@@ -150,6 +157,12 @@ public class Alarme extends AppCompatActivity implements
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String spinnerLabel = parent.getItemAtPosition(position).toString();
+        if (parent.getId() == R.id.spinner_limite_expansao) {
+            tempo_limite = Byte.valueOf(spinnerLabel);
+        } else {
+            expansao_limite = Byte.valueOf(spinnerLabel);
+        }
+//
 //        displayToast(spinnerLabel);
     }
 
@@ -164,18 +177,29 @@ public class Alarme extends AppCompatActivity implements
     }
 
     public void iniciarTransmissao(View view) {
+        String pacote =
+                CHAR_CONTROLE +
+                        CHAR_INICIO + expansao_limite + CHAR_CONTROLE + tempo_limite +
+                        CHAR_FIM + CHAR_CONTROLE;
+
         if (connect.isConnected) {
-            connect.write(INICIAR_TRANSMISSAO.getBytes());
-            displayToast("Conecatado e transmitindo: " + INICIAR_TRANSMISSAO);
+            connect.write(pacote.getBytes());
+
+            displayToast("Conectado e transmitindo: " + pacote);
         } else {
             displayToast("DESCONECTADO");
         }
     }
 
     public void paraTransmissao(View view) {
+        String pacote = CHAR_CONTROLE + CHAR_FIM + CHAR_CONTROLE;
         if (connect.isConnected) {
-            connect.write(PARAR_TRANSMISSAO.getBytes());
-            displayToast("Parando: " + PARAR_TRANSMISSAO);
+            try {
+                connect.write(pacote.getBytes("UTF-8"));
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            displayToast("Parando: " + CHAR_FIM);
 
         } else {
             displayToast("DESCONECTADO");
