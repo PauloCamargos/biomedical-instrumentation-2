@@ -113,7 +113,7 @@ public class Alarme extends AppCompatActivity implements
 
     static void addEntry(String dataString) {
         mSeries1.appendData(new DataPoint(lastX++,
-                Double.parseDouble((String) dataString)), false, 50);
+                Double.parseDouble(dataString)), false, 50);
     }
 
 
@@ -182,9 +182,10 @@ public class Alarme extends AppCompatActivity implements
                         CHAR_INICIO + expansao_limite + CHAR_CONTROLE + tempo_limite +
                         CHAR_FIM + CHAR_CONTROLE;
 
+        pacote = CHAR_INICIO + tempo_limite  + CHAR_CONTROLE+ expansao_limite + CHAR_FIM;
+
         if (connect.isConnected) {
             connect.write(pacote.getBytes());
-
             displayToast("Conectado e transmitindo: " + pacote);
         } else {
             displayToast("DESCONECTADO");
@@ -192,13 +193,9 @@ public class Alarme extends AppCompatActivity implements
     }
 
     public void paraTransmissao(View view) {
-        String pacote = CHAR_CONTROLE + CHAR_FIM + CHAR_CONTROLE;
+        String pacote = CHAR_FIM;
         if (connect.isConnected) {
-            try {
-                connect.write(pacote.getBytes("UTF-8"));
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
+            connect.write(pacote.getBytes());
             displayToast("Parando: " + CHAR_FIM);
 
         } else {

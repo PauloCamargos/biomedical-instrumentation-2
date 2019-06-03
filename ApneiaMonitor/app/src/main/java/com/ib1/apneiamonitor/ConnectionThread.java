@@ -168,14 +168,14 @@ public class ConnectionThread extends Thread{
                      */
                     byte[] buffer = new byte[1024];
                     int bytes;
-                    int bytesRead = 0;
+                    int bytesRead = -1;
 
                     /*  Lê os bytes recebidos e os armazena no buffer até que
                     uma quebra de linha seja identificada. Nesse ponto, assumimos
                     que a mensagem foi transmitida por completo.
                      */
                     do {
-                        bytes = input.read(buffer, bytesRead, 1);
+                        bytes = input.read(buffer, bytesRead+1, 1);
                         bytesRead+=bytes;
                     } while(buffer[bytesRead] != '\n');
 
