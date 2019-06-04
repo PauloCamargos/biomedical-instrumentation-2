@@ -42,7 +42,7 @@ float stdAlarm = 15;        // desvio padrao limite para alarme
 int tempoAlarme = 5;          // tempo para disparo de alarme [s]
 float limiarStd = 0;
 
-float TA = (1.0 / FA) * 1000.0; // tempo de amostragem em ms
+float TA = (1.0 / FA) * 1000000.0; // tempo de amostragem em us
 
 char lixo;
 String data = "";
@@ -92,7 +92,7 @@ void loop() {
       Serial.println("tempoAlarm: " + (String) tempoAlarme);
       Serial.println("limiarStd: " + (String) limiarStd);
 
-      Timer1.initialize(TA * 100);
+      Timer1.initialize(TA);
       Timer1.attachInterrupt(sendSignal);
       Serial.println("S");
     } else if (inChar == END) {
@@ -118,33 +118,32 @@ void sendSignal() {
   meanVal = breathSignal.mean();
   stdDev = breathSignal.stdDeviation();
 
-  /* PERIODO DE CALIBRACAO --------------------
+  /* PERIODO DE CALIBRACAO -----------------------------
     Colhe o desvio padrao durante os 10s iniciais
     da coleta. Realiza a media destes valores e
     multiplica pelo limiar definido no app.
-    //  */
+     */
   if (calibrationCounter <= 100) {
     calibrationCounter++;
     calibrationSignal.addData(stdDev);
-
     stdAlarm = (limiarStd / 100.0) * calibrationSignal.mean();
   }
-  /* -------------------------------------------*/
+  /* ---------------------------------------------------*/
 
   byte mappedMean = map(meanVal, minVal, maxVal, 0, 255);
 
-  
+  /* DECISAO PARA DISPARAR ALARME  ---------------------*/
   if (stdDev <= stdAlarm) {
-    //    Serial.println("");
     if (millis() > (time_to_alarm + tempoAlarme * 1000)) {
-      //      Serial.println("TEMPO: " + (String) tempoAlarme);
       triggerAlarm();
     }
   }
   else {
     time_to_alarm = millis();
   }
+  /* ---------------------------------------------------*/
 
+  /* IMPRESSAO DOS VALORES NO SERIAL MONITOR ------------*/
   Serial.print(0);  // To freeze the lower limit
   Serial.print("|");
   Serial.print(255);  // To freeze the upper limit
@@ -157,10 +156,12 @@ void sendSignal() {
   Serial.print(stdAlarm);
   Serial.print("|");
   Serial.println(tempoAlarme);
+  /* -----------------------------------------------*/
 
-
+  /* DADOS PARA O ANDROID --------------------------*/
   blth.print(mappedMean);
   blth.print("\n");
+  /* -----------------------------------------------*/
 }
 
 void triggerAlarm() {
