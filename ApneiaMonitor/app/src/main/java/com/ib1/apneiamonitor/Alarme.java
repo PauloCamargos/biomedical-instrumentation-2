@@ -3,9 +3,12 @@ package com.ib1.apneiamonitor;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -18,14 +21,23 @@ import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.UUID;
 
 public class Alarme extends AppCompatActivity implements
         AdapterView.OnItemSelectedListener {
+    public static final String TAG = "Alarme";
 
     public static final String CHAR_INICIO = "S";
     public static final String CHAR_FIM = "E";
     public static final String CHAR_CONTROLE = "$";
+    public static Queue<String> buffer = new LinkedList<>();
 
     static TextView statusConexaoBth;
 
@@ -39,7 +51,8 @@ public class Alarme extends AppCompatActivity implements
 
     public Byte tempo_limite;
     public Byte expansao_limite;
-
+    static DatabaseHelper mDatabaseHelper;
+    public SaveToFileThread saveToFileThread = new SaveToFileThread(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,11 +122,9 @@ public class Alarme extends AppCompatActivity implements
         viewport.setMinY(0);
         viewport.setMaxY(255);
         viewport.setScrollable(true);
-    }
 
-    static void addEntry(String dataString) {
-        mSeries1.appendData(new DataPoint(lastX++,
-                Double.parseDouble(dataString)), false, 50);
+        // DATABASE CONFIGS
+        mDatabaseHelper = new DatabaseHelper(this);
     }
 
 
@@ -121,7 +132,7 @@ public class Alarme extends AppCompatActivity implements
         @Override
         public void handleMessage(Message msg) {
 
-            /* Esse método é invocado na Activity principal
+            /* Esse método é invocado
                 sempre que a thread de conexão Bluetooth recebe
                 uma mensagem.
              */
@@ -149,10 +160,18 @@ public class Alarme extends AppCompatActivity implements
                  */
 //                valorLidoBth.setText(dataString);
                 addEntry(dataString);
+                Alarme.buffer.add(dataString);
+
             }
 
         }
     };
+
+
+    public static void addEntry(String dataString) {
+        mSeries1.appendData(new DataPoint(lastX++,
+                Double.parseDouble(dataString)), false, 50);
+    }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -177,22 +196,53 @@ public class Alarme extends AppCompatActivity implements
     }
 
     public void iniciarTransmissao(View view) {
+        createDatabaseRecord();
         String pacote =
                 CHAR_CONTROLE +
                         CHAR_INICIO + expansao_limite + CHAR_CONTROLE + tempo_limite +
                         CHAR_FIM + CHAR_CONTROLE;
 
-        pacote = CHAR_INICIO + tempo_limite  + CHAR_CONTROLE+ expansao_limite + CHAR_FIM;
+        pacote = CHAR_INICIO + tempo_limite + CHAR_CONTROLE + expansao_limite + CHAR_FIM;
 
         if (connect.isConnected) {
             connect.write(pacote.getBytes());
-            displayToast("Conectado e transmitindo: " + pacote);
+//            displayToast("Conectado e transmitindo: " + pacote);
         } else {
             displayToast("DESCONECTADO");
         }
     }
 
+    /*
+    Chama a thread para recolher dados do buffer salvar no arquivo
+     */
+    private void createDatabaseRecord() {
+        String filename = UUID.randomUUID().toString().replace("-", "") + ".txt";
+        boolean insertData = mDatabaseHelper.addData(System.currentTimeMillis(), filename);
+        startFileFill(filename);
+
+        if (insertData) {
+            this.displayToast("Arquivo criado");
+        } else {
+            this.displayToast("Erro ao criar arquivo");
+        }
+    }
+
+    private void startFileFill(String filename) {
+//        String filename = mDatabaseHelper.getLastFilename();
+        Log.d(TAG, "startFileFill: arquivo: " + filename);
+        saveToFileThread.setFilename(filename);
+        saveToFileThread.start();
+        Log.d(TAG, "startFileFill:Buffer: " + Alarme.buffer);
+
+    }
+
     public void paraTransmissao(View view) {
+        try {
+            saveToFileThread.cancel();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         String pacote = CHAR_FIM;
         if (connect.isConnected) {
             connect.write(pacote.getBytes());
