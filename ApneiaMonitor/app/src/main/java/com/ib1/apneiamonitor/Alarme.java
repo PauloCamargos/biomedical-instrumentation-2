@@ -2,9 +2,6 @@ package com.ib1.apneiamonitor;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.bluetooth.BluetoothAdapter;
-import android.content.Context;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,11 +19,6 @@ import com.jjoe64.graphview.Viewport;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.LineGraphSeries;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
@@ -53,6 +46,8 @@ public class Alarme extends AppCompatActivity implements
     public Byte expansao_limite;
     static DatabaseHelper mDatabaseHelper;
     public SaveToFileThread saveToFileThread = new SaveToFileThread(this);
+    public Button startBtn;
+    public Button stopBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +55,8 @@ public class Alarme extends AppCompatActivity implements
         setContentView(R.layout.activity_alarme);
 
         statusConexaoBth = findViewById(R.id.status_dispositivo_conectado);
-
+        startBtn = (Button) findViewById(R.id.iniciarTransmissao);
+        stopBtn = (Button) findViewById(R.id.paraTransmissao);
 
         Spinner spinner_tempo_limite = findViewById(R.id.spinner_tempo_limite);
         Spinner spinner_limite_expansao = findViewById(R.id.spinner_limite_expansao);
@@ -98,7 +94,10 @@ public class Alarme extends AppCompatActivity implements
 //        if (btAdapter.isEnabled()) {
         // iniciar thread de conexao
         connect = new ConnectionThread(blth_address);
-        connect.start();
+        if (!connect.isConnected) {
+            connect.start();
+            stopBtn.setEnabled(false);
+        }
 //        }
 //        try {
 //            Thread.sleep(50);
@@ -196,7 +195,6 @@ public class Alarme extends AppCompatActivity implements
     }
 
     public void iniciarTransmissao(View view) {
-        createDatabaseRecord();
         String pacote =
                 CHAR_CONTROLE +
                         CHAR_INICIO + expansao_limite + CHAR_CONTROLE + tempo_limite +
@@ -204,11 +202,20 @@ public class Alarme extends AppCompatActivity implements
 
         pacote = CHAR_INICIO + tempo_limite + CHAR_CONTROLE + expansao_limite + CHAR_FIM;
 
-        if (connect.isConnected) {
-            connect.write(pacote.getBytes());
-//            displayToast("Conectado e transmitindo: " + pacote);
-        } else {
-            displayToast("DESCONECTADO");
+        try {
+            if (connect.isConnected) {
+                connect.write(pacote.getBytes());
+                Log.d(TAG, "Conectado e transmitindo: " + pacote);
+
+                stopBtn.setEnabled(true);
+                startBtn.setEnabled(false);
+                createDatabaseRecord();
+
+            } else {
+                displayToast("DESCONECTADO");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -217,39 +224,43 @@ public class Alarme extends AppCompatActivity implements
      */
     private void createDatabaseRecord() {
         String filename = UUID.randomUUID().toString().replace("-", "") + ".txt";
-        boolean insertData = mDatabaseHelper.addData(System.currentTimeMillis(), filename);
+        mDatabaseHelper.addData(System.currentTimeMillis(), filename);
         startFileFill(filename);
-
-        if (insertData) {
-            this.displayToast("Arquivo criado");
-        } else {
-            this.displayToast("Erro ao criar arquivo");
-        }
     }
 
     private void startFileFill(String filename) {
 //        String filename = mDatabaseHelper.getLastFilename();
         Log.d(TAG, "startFileFill: arquivo: " + filename);
-        saveToFileThread.setFilename(filename);
-        saveToFileThread.start();
-        Log.d(TAG, "startFileFill:Buffer: " + Alarme.buffer);
 
+        saveToFileThread.setFilename(filename);
+        saveToFileThread.setRunning(true);
+
+        if (!saveToFileThread.hasStarted) {
+            saveToFileThread.setHasStarted(true);
+            saveToFileThread.start();
+        }
+
+
+        Log.d(TAG, "startFileFill:Buffer: " + Alarme.buffer);
     }
+
 
     public void paraTransmissao(View view) {
         try {
-            saveToFileThread.cancel();
+            String pacote = CHAR_FIM;
+            if (connect.isConnected) {
+                connect.write(pacote.getBytes());
+                displayToast("Parando: " + CHAR_FIM);
+
+                saveToFileThread.setRunning(false);
+
+                stopBtn.setEnabled(false);
+                startBtn.setEnabled(true);
+            } else {
+                displayToast("DESCONECTADO");
+            }
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        String pacote = CHAR_FIM;
-        if (connect.isConnected) {
-            connect.write(pacote.getBytes());
-            displayToast("Parando: " + CHAR_FIM);
-
-        } else {
-            displayToast("DESCONECTADO");
         }
     }
 }

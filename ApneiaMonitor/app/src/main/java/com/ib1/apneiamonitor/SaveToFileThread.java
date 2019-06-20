@@ -15,11 +15,7 @@ public class SaveToFileThread extends Thread {
     public Context context;
     public String filename;
     public boolean running = false;
-
-    public SaveToFileThread(Context context, String filename) {
-        this.context = context;
-        this.filename = filename;
-    }
+    public boolean hasStarted=false;
 
     public SaveToFileThread(Context context) {
         this.context = context;
@@ -29,8 +25,17 @@ public class SaveToFileThread extends Thread {
         this.filename = filename;
     }
 
+    public boolean isHasStarted() {
+        return hasStarted;
+    }
+
+    public void setHasStarted(boolean hasStarted) {
+        this.hasStarted = hasStarted;
+    }
+
+    @Override
     public void run() {
-        this.running = true;
+        Log.d(TAG, "run-isRunning?" + running);
 
         File path = context.getFilesDir();
         File file = new File(path, filename);
@@ -38,6 +43,8 @@ public class SaveToFileThread extends Thread {
 //            FileWriter writer = new FileWriter(file);
             PrintWriter writer = new PrintWriter(file);
             while (running) {
+
+
                 if (!Alarme.buffer.isEmpty()) {
 //                FileOutputStream stream = new FileOutputStream(file);
 
@@ -57,11 +64,14 @@ public class SaveToFileThread extends Thread {
     }
 
     public void cancel() {
-        try {
-            running = false;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         running = false;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public void setRunning(boolean status) {
+        this.running = status;
     }
 }

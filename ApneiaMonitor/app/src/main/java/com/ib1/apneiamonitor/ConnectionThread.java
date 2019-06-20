@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 public class ConnectionThread extends Thread{
 
+    static final String TAG = "ConnectionThread";
     BluetoothSocket btSocket = null;
     BluetoothServerSocket btServerSocket = null;
     InputStream input = null;
@@ -24,6 +26,7 @@ public class ConnectionThread extends Thread{
     boolean server;
     boolean running = false;
     boolean isConnected = false;
+
 
     /*  Este construtor prepara o dispositivo para atuar como servidor.
      */
@@ -224,7 +227,7 @@ public class ConnectionThread extends Thread{
 //        }
         if(output != null) {
             try {
-
+                Log.d(TAG, "Transmitindo " + data.toString());
                 /*  Transmite a mensagem.
                  */
                 output.write(data);
@@ -248,8 +251,13 @@ public class ConnectionThread extends Thread{
 
             running = false;
             this.isConnected = false;
-            btServerSocket.close();
-            btSocket.close();
+            if (btServerSocket != null) {
+                btServerSocket.close();
+
+            }
+            if (btSocket != null) {
+                btSocket.close();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

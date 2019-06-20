@@ -42,7 +42,7 @@ float stdAlarm = 15;        // desvio padrao limite para alarme
 int tempoAlarme = 5;          // tempo para disparo de alarme [s]
 float limiarStd = 0;
 
-float TA = (1.0 / FA) * 1000000.0; // tempo de amostragem em us
+unsigned long TA = (1.0 / FA) * 1000000.0; // tempo de amostragem em us
 
 char lixo;
 String data = "";
@@ -58,16 +58,22 @@ void setup() {
 }
 
 void loop() {
-  char inChar;
+  String inChar;
   if (blth.available()) {
-    inChar = blth.read();
-    if (inChar == START) {
+    inChar = blth.readString();
+    while (blth.available() > 0) {
+      lixo = blth.read();
+    }
+    
+    Serial.print("C: ");
+    Serial.println(inChar.charAt(0) == START);
+    if (inChar.charAt(0) == START) {
       calibrationCounter = 0;
       String expansao = "";
       String tempo = "";
 
-      String expansaoTensao = blth.readString();
-      int i = 0;
+      String expansaoTensao = inChar;
+      int i = 1;
       char charPos = 'X';
 
       while (charPos != DELIMITADOR) {
@@ -95,13 +101,11 @@ void loop() {
       Timer1.initialize(TA);
       Timer1.attachInterrupt(sendSignal);
       Serial.println("S");
-    } else if (inChar == END) {
+    } else if (inChar.charAt(0) == END) {
       Timer1.detachInterrupt();
       Serial.println("E");
     }
-    while (blth.available() > 0) {
-      lixo = blth.read();
-    }
+
   }
 }
 
