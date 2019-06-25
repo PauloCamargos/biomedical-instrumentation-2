@@ -44,10 +44,13 @@ public class Alarme extends AppCompatActivity implements
 
     public Byte tempo_limite;
     public Byte expansao_limite;
+    public static int disparos = 0;
     static DatabaseHelper mDatabaseHelper;
     public SaveToFileThread saveToFileThread = new SaveToFileThread(this);
     public Button startBtn;
     public Button stopBtn;
+
+    public String filename;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +131,7 @@ public class Alarme extends AppCompatActivity implements
 
 
     public static Handler handler = new Handler() {
+
         @Override
         public void handleMessage(Message msg) {
 
@@ -158,8 +162,14 @@ public class Alarme extends AppCompatActivity implements
                     contador.
                  */
 //                valorLidoBth.setText(dataString);
-                addEntry(dataString);
-                Alarme.buffer.add(dataString);
+                Log.d(TAG, "dataString: " + dataString);
+
+                if (dataString.equals("T")) {
+                    Log.d(TAG, "Disparos: " + disparos++);
+                } else {
+                    addEntry(dataString);
+                    Alarme.buffer.add(dataString);
+                }
 
             }
 
@@ -195,10 +205,7 @@ public class Alarme extends AppCompatActivity implements
     }
 
     public void iniciarTransmissao(View view) {
-        String pacote =
-                CHAR_CONTROLE +
-                        CHAR_INICIO + expansao_limite + CHAR_CONTROLE + tempo_limite +
-                        CHAR_FIM + CHAR_CONTROLE;
+        String pacote;
 
         pacote = CHAR_INICIO + tempo_limite + CHAR_CONTROLE + expansao_limite + CHAR_FIM;
 
@@ -209,7 +216,7 @@ public class Alarme extends AppCompatActivity implements
 
                 stopBtn.setEnabled(true);
                 startBtn.setEnabled(false);
-                createDatabaseRecord();
+                createDatabaseRecord(tempo_limite, expansao_limite);
 
             } else {
                 displayToast("DESCONECTADO");
@@ -220,11 +227,18 @@ public class Alarme extends AppCompatActivity implements
     }
 
     /*
+    Salva o limite de tempo e expansão no banco de dados para a coleta
+     */
+
+    /*
     Chama a thread para recolher dados do buffer salvar no arquivo
      */
-    private void createDatabaseRecord() {
-        String filename = UUID.randomUUID().toString().replace("-", "") + ".txt";
-        mDatabaseHelper.addData(System.currentTimeMillis(), filename);
+    private void createDatabaseRecord(Byte tempo_limite, Byte expansao_limite) {
+        filename = UUID.randomUUID().toString().replace("-", "") + ".txt";
+        String tempoLimite = tempo_limite.toString();
+        String expansaoLimite = expansao_limite.toString();
+        Log.d(TAG, "tempo: " + tempoLimite + " expansao: " + expansaoLimite);
+        mDatabaseHelper.addData(System.currentTimeMillis(), filename, tempoLimite, expansaoLimite);
         startFileFill(filename);
     }
 
@@ -246,6 +260,9 @@ public class Alarme extends AppCompatActivity implements
 
 
     public void paraTransmissao(View view) {
+        mDatabaseHelper.addTriggersAmount(Integer.toString(Alarme.disparos), filename);
+        Log.d(TAG, "paraTransmissao: " + Alarme.disparos);
+
         try {
             String pacote = CHAR_FIM;
             if (connect.isConnected) {

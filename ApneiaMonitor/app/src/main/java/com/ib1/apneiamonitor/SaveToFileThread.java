@@ -50,7 +50,6 @@ public class SaveToFileThread extends Thread {
 
                     while (Alarme.buffer.size() >= 1) {
                         String signalData = Alarme.buffer.remove();
-                        Log.d(TAG, "signalData: " + signalData);
                         writer.println(signalData);
                     }
                 }

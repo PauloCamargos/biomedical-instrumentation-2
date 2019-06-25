@@ -14,7 +14,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.UUID;
 
-public class ConnectionThread extends Thread{
+public class ConnectionThread extends Thread {
 
     static final String TAG = "ConnectionThread";
     BluetoothSocket btSocket = null;
@@ -59,7 +59,7 @@ public class ConnectionThread extends Thread{
         /*  Determina que ações executar dependendo se a thread está configurada
         para atuar como servidor ou cliente.
          */
-        if(this.server) {
+        if (this.server) {
 
             /*  Servidor.
              */
@@ -76,7 +76,7 @@ public class ConnectionThread extends Thread{
                 /*  Se a conexão foi estabelecida corretamente, o socket
                 servidor pode ser liberado.
                  */
-                if(btSocket != null) {
+                if (btSocket != null) {
 
                     btServerSocket.close();
                 }
@@ -135,7 +135,7 @@ public class ConnectionThread extends Thread{
             ...
          */
 
-        if(btSocket != null) {
+        if (btSocket != null) {
 
             /*  Envia um código para a Activity principal informando que a
             a conexão ocorreu com sucesso.
@@ -159,7 +159,7 @@ public class ConnectionThread extends Thread{
                     Esta thread permanecerá em estado de escuta até que
                 a variável running assuma o valor false.
                  */
-                while(running) {
+                while (running) {
 
                     /*  Cria um byte array para armazenar temporariamente uma
                     mensagem recebida.
@@ -178,9 +178,9 @@ public class ConnectionThread extends Thread{
                     que a mensagem foi transmitida por completo.
                      */
                     do {
-                        bytes = input.read(buffer, bytesRead+1, 1);
-                        bytesRead+=bytes;
-                    } while(buffer[bytesRead] != '\n');
+                        bytes = input.read(buffer, bytesRead + 1, 1);
+                        bytesRead += bytes;
+                    } while (buffer[bytesRead] != '\n');
 
                     /*  A mensagem recebida é enviada para a Activity principal.
                      */
@@ -225,7 +225,7 @@ public class ConnectionThread extends Thread{
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-        if(output != null) {
+        if (output != null) {
             try {
                 Log.d(TAG, "Transmitindo " + data.toString());
                 /*  Transmite a mensagem.

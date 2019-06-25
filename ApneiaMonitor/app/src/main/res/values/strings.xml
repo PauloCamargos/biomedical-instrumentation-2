@@ -31,8 +31,14 @@
     <string name="lbl_valor_lido">Valor lido:</string>
     <string name="txt_valor_lido">0</string>
     <string name="btn_lbl_parar">Parar</string>
-    <string name="lblTrigger">Disparos: </string>
+    <string name="lblTrigger">Disparos</string>
     <string name="valueTriggerAmount">0</string>
+    <string name="lblAverage">Média</string>
+    <string name="valueAverage">0</string>
+    <string name="lblMax">Máximo</string>
+    <string name="lblMínimo">Mínimo</string>
+    <string name="lblDisparos">Disparos</string>
+    <string name="lblTempoColeta">Tempo de coleta</string>
 
     <string-array name="dispositivos_disponiveis">
         <item>Dispositivo 1</item>
