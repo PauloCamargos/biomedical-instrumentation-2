@@ -236,19 +236,19 @@ public class Historico extends Activity implements AdapterView.OnItemSelectedLis
 
             graph.getViewport().setXAxisBoundsManual(true);
             graph.getViewport().setMinX(0);
-            graph.getViewport().setMaxX(lastX);
+            graph.getViewport().setMaxX(150);
 
             // enable scaling and scrolling
             graph.getViewport().setScalable(true);
-            graph.getViewport().setScalableY(true);
+            graph.getViewport().setScalableY(false);
 
             graph.getViewport().setScrollable(true); // enables horizontal scrolling
             graph.getViewport().setScrollableY(true); // enables vertical scrolling
             graph.getViewport().setScalable(true); // enables horizontal zooming and scrolling
-            graph.getViewport().setScalableY(true); // enables vertical zooming and scrolling
+            graph.getViewport().setScalableY(false); // enables vertical zooming and scrolling
 
             GridLabelRenderer gridLabel = graph.getGridLabelRenderer();
-            gridLabel.setHorizontalAxisTitle("T [s]");
+            gridLabel.setHorizontalAxisTitle("T [* 0.1s]");
 
             graph.addSeries(mSeries1);
 

@@ -43,6 +43,7 @@ int tempoAlarme = 5;          // tempo para disparo de alarme [s]
 float limiarStd = 0;
 int fireAmount = 0;
 bool fireWarned = false;
+bool calibrating = true;
 
 unsigned long TA = (1.0 / FA) * 1000000.0; // tempo de amostragem em us
 
@@ -99,7 +100,7 @@ void loop() {
 
       Serial.println("tempoAlarm: " + (String) tempoAlarme);
       Serial.println("limiarStd: " + (String) limiarStd);
-
+      calibrating = true;
       Timer1.initialize(TA);
       Timer1.attachInterrupt(sendSignal);
       Serial.println("S");
@@ -133,6 +134,8 @@ void sendSignal() {
     calibrationCounter++;
     calibrationSignal.addData(stdDev);
     stdAlarm = (limiarStd / 100.0) * calibrationSignal.mean();
+  }else {
+    calibrating=false;
   }
   /* ---------------------------------------------------*/
 
@@ -151,7 +154,7 @@ void sendSignal() {
     fireWarned = false;
   }
 
-  if(fireAmount != 0 && !fireWarned){
+  if(fireAmount != 0 && !fireWarned && !calibrating){
     blth.print('T');
     blth.print("\n");
     fireWarned = true;
