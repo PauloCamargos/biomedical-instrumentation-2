@@ -15,24 +15,16 @@
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity
-            android:name=".Historico"
-            android:label="@string/title_historico"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ib1.apneiamonitor.MainActivity" />
-        </activity>
-        <activity
-            android:name=".Calibracao"
-            android:label="@string/title_calibracao"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ib1.apneiamonitor.MainActivity" />
-        </activity>
-        <activity
             android:name=".Alarme"
             android:label="@string/title_alarme"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.ib1.apneiamonitor.MainActivity" />
+        </activity>
+        <activity
+            android:name=".Historico"
+            android:label="@string/title_historico"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

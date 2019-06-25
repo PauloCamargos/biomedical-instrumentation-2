@@ -70,20 +70,20 @@
         app:layout_constraintTop_toBottomOf="@+id/label_expiracao"
         app:srcCompat="@drawable/exhale" />
 
-    <TextView
-        android:id="@+id/label_inspiracao_medido"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginLeft="12dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="@string/label_valor_medido"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toStartOf="@+id/textView7"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/text_inpiracao_instrucao" />
+    <!--<TextView-->
+        <!--android:id="@+id/label_inspiracao_medido"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginStart="12dp"-->
+        <!--android:layout_marginLeft="12dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginEnd="8dp"-->
+        <!--android:layout_marginRight="8dp"-->
+        <!--android:text="@string/label_valor_medido"-->
+        <!--android:textStyle="bold"-->
+        <!--app:layout_constraintEnd_toStartOf="@+id/textView7"-->
+        <!--app:layout_constraintStart_toEndOf="@+id/imageView"-->
+        <!--app:layout_constraintTop_toBottomOf="@+id/text_inpiracao_instrucao" />-->
 
     <TextView
         android:id="@+id/label_respiracao_medido"

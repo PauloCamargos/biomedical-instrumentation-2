@@ -136,14 +136,14 @@ public class MainActivity extends AppCompatActivity implements
                     intentAlarme.putExtra(EXTRA_MESSAGE, R.string.title_alarme);
                     startActivity(intentAlarme);
                     return true;
-                case R.id.navigation_calibracao:
-                    Intent intentCalibracao = new Intent(MainActivity.this, Calibracao.class);
-                    intentCalibracao.putExtra(EXTRA_MESSAGE, R.string.title_calibracao);
-                    startActivity(intentCalibracao);
-                    return true;
+//                case R.id.navigation_calibracao:
+//                    Intent intentCalibracao = new Intent(MainActivity.this, Calibracao.class);
+//                    intentCalibracao.putExtra(EXTRA_MESSAGE, R.string.title_calibracao);
+//                    startActivity(intentCalibracao);
+//                    return true;
                 case R.id.navigation_historico:
                     Intent intentHistorico = new Intent(MainActivity.this, Historico.class);
-                    intentHistorico.putExtra(EXTRA_MESSAGE, R.string.title_alarme);
+//                    intentHistorico.putExtra(EXTRA_MESSAGE, R.string.title_alarme);
                     startActivity(intentHistorico);
                     return true;
             }
